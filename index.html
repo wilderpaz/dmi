@@ -1,1 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Médico Interativo: Aloisio de Jesus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Brilliant Blues & Professional -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard with a clear narrative flow, not mirroring the linear structure of the source reports. The architecture follows a thematic progression: 1) A high-level summary dashboard with key vital stats for immediate context. 2) A deep dive into the primary disease (APSV) with a historical data chart. 3) An explanation of the core treatment dilemma ("The Double-Edged Sword"). 4) A multi-section exploration of the systemic, iatrogenic side effects (kidneys, diabetes, bones), each with its own focused visualization. 5) An interactive breakdown of the complex current management strategy, using tabs to simplify the polypharmacy regimen. This structure was chosen to guide the user from the core problem to its consequences and finally to the current solution, making a complex medical case understandable through a logical, story-driven, and interactive flow. -->
+    <!-- Visualization & Content Choices: 
+        - Hemoglobin History -> Goal: Change -> Viz: Line Chart (Chart.js) -> Interaction: Hover for details -> Justification: Best for showing trends over time and the recent critical drop.
+        - Proteinuria Level -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover -> Justification: Clearly shows the magnitude of the patient's result against the normal reference value.
+        - Bone Density -> Goal: Compare/Organize -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Hover -> Justification: Excellent for comparing multiple categories (body parts) against a negative scale and easily readable labels.
+        - Management Strategy -> Goal: Organize/Compare -> Viz: Doughnut Chart (Chart.js) -> Interaction: Hover -> Justification: Provides a quick, high-level overview of the proportional effort in the treatment plan.
+        - Medication List -> Goal: Organize/Inform -> Viz: Tabbed Interface (HTML/CSS/JS) -> Interaction: Click tabs to reveal categorized lists -> Justification: Organizes an overwhelming amount of information (polypharmacy) into digestible, user-controlled sections.
+        - Treatment Causality -> Goal: Relationships -> Viz: Diagram (HTML/CSS) -> Interaction: Static -> Justification: A simple, clear visual to establish the core cause-and-effect link without complex libraries. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .tab-active {
+            border-bottom-color: #003F5C;
+            color: #003F5C;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #4A5568;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003F5C]">Dashboard Médico Interativo</h1>
+            <p class="text-xl md:text-2xl text-[#444E86] mt-2">Paciente: Aloisio de Jesus, 66 anos</p>
+            <p class="mt-4 max-w-4xl mx-auto text-gray-600">
+                Uma análise da complexa jornada clínica do paciente, focando na Aplasia Pura da Série Vermelha (APSV) e na cascata de efeitos iatrogênicos decorrentes do tratamento imunossupressor. Navegue pelas seções para explorar a evolução do caso.
+            </p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="overview">
+                <h2 class="text-3xl font-bold text-[#003F5C] mb-6 text-center">Painel de Status Crítico</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#DD5182]">
+                        <p class="text-lg font-semibold text-gray-600">Hemoglobina (13/09/25)</p>
+                        <p class="text-6xl font-bold text-[#DD5182] my-2">3.8 <span class="text-3xl align-text-bottom">g/dL</span></p>
+                        <p class="text-gray-500">Ref: 12.4 - 17.0</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#955196]">
+                        <p class="text-lg font-semibold text-gray-600">Proteinúria 24h (22/09/25)</p>
+                        <p class="text-6xl font-bold text-[#955196] my-2">612.5 <span class="text-3xl align-text-bottom">mg</span></p>
+                        <p class="text-gray-500">Ref: 28 - 140</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#FF6E54]">
+                        <p class="text-lg font-semibold text-gray-600">T-Score (Coluna L1-L4)</p>
+                        <p class="text-6xl font-bold text-[#FF6E54] my-2">-4.3</p>
+                        <p class="text-gray-500">Diagnóstico: Osteoporose Severa</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="aplasia" class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-3xl font-bold text-[#003F5C] mb-2 text-center">1. A Doença Primária: Aplasia Pura da Série Vermelha</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-6">A APSV é uma doença rara onde a medula óssea para de produzir glóbulos vermelhos, causando anemia crônica grave. O gráfico abaixo mostra a luta contínua do paciente, com quedas recorrentes nos níveis de hemoglobina que exigem transfusões de sangue frequentes.</p>
+                <div class="chart-container">
+                    <canvas id="hemoglobinChart"></canvas>
+                </div>
+            </section>
+
+            <section id="treatment" class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-3xl font-bold text-[#003F5C] mb-4 text-center">2. O Tratamento: A Espada de Dois Gumes</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">Para controlar a APSV, a terapia imunossupressora de alta dose é essencial. No entanto, esses medicamentos potentes, embora salvem vidas ao tratar a aplasia, são a causa direta de uma série de complicações sistêmicas graves.</p>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-6">
+                    <div class="text-center p-6 border-2 border-[#FFA600] rounded-lg shadow-sm bg-yellow-50 w-64">
+                        <p class="text-xl font-semibold text-[#FFA600]">Ciclosporina</p>
+                        <p class="text-4xl font-bold text-[#444E86]">400 <span class="text-lg">mg/dia</span></p>
+                    </div>
+                    <div class="text-5xl font-light text-gray-400">➔</div>
+                     <div class="text-center p-6 border-2 border-gray-300 rounded-lg shadow-inner bg-gray-100 w-64">
+                        <p class="text-xl font-semibold text-gray-700">Cascata Iatrogênica</p>
+                    </div>
+                    <div class="text-5xl font-light text-gray-400">➔</div>
+                    <div class="text-center p-6 border-2 border-[#DD5182] rounded-lg shadow-sm bg-red-50 w-64">
+                        <p class="text-xl font-semibold text-[#DD5182]">Prednisona</p>
+                        <p class="text-4xl font-bold text-[#444E86]">40 <span class="text-lg">mg/dia</span></p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="cascade">
+                <h2 class="text-3xl font-bold text-[#003F5C] mb-6 text-center">3. A Cascata Iatrogênica: Consequências do Tratamento</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                        <h3 class="text-2xl font-semibold text-[#955196] mb-3 text-center">Dano Renal (Nefrotoxicidade)</h3>
+                        <p class="text-gray-600 mb-4 flex-grow">A Ciclosporina é conhecida por sua toxicidade renal. O gráfico de barras ilustra a severa perda de proteína na urina (proteinúria), um marcador chave de Doença Renal Crônica, excedendo em mais de 4 vezes o limite normal.</p>
+                        <div class="chart-container mt-auto">
+                            <canvas id="proteinuriaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                        <h3 class="text-2xl font-semibold text-[#DD5182] mb-3 text-center">Diabetes Mellitus Induzido</h3>
+                        <p class="text-gray-600 mb-4 flex-grow">O uso crônico de Prednisona (corticoide) induziu o desenvolvimento de Diabetes tipo 2. O primeiro relatório ligando o corticoide à necessidade de controle glicêmico data de Agosto de 2019, estabelecendo uma clara linha do tempo para esta complicação.</p>
+                         <div class="mt-auto space-y-4 p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">🗓️</span>
+                                <div>
+                                    <p class="font-bold text-red-800">Agosto 2019</p>
+                                    <p class="text-red-700">Início do corticoide em alta dose e recomendação de controle glicêmico.</p>
+                                </div>
+                            </div>
+                             <div class="flex items-center">
+                                <span class="text-2xl mr-4">💉</span>
+                                <div>
+                                    <p class="font-bold text-red-800">Presente</p>
+                                    <p class="text-red-700">Dependência de múltiplas injeções diárias de insulina.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6 flex flex-col">
+                        <h3 class="text-2xl font-semibold text-[#FF6E54] mb-3 text-center">Osteoporose Severa</h3>
+                        <p class="text-gray-600 mb-4 flex-grow">Outro efeito grave dos corticoides é a perda acelerada de massa óssea. O T-score da densitometria revela osteoporose severa, especialmente na coluna, colocando o paciente em altíssimo risco de fraturas.</p>
+                        <div class="chart-container mt-auto">
+                            <canvas id="osteoporosisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="management" class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-3xl font-bold text-[#003F5C] mb-2 text-center">4. Estratégia de Manejo Atual</h2>
+                 <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">O tratamento é um ato de equilíbrio, utilizando uma abordagem de polifarmácia para gerenciar a aplasia e suas complicações, suplementada por terapias nutricionais e fitoterápicas para suporte sistêmico. Interaja com as abas abaixo para ver os medicamentos por categoria.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+                    <div class="lg:col-span-2">
+                         <div class="chart-container h-80 max-h-96">
+                            <canvas id="managementDonutChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <div>
+                            <div class="border-b border-gray-200">
+                                <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                                    <button class="med-tab whitespace-nowrap py-3 px-1 border-b-2 text-sm tab-active" data-target="imuno">Imunossupressão</button>
+                                    <button class="med-tab whitespace-nowrap py-3 px-1 border-b-2 text-sm tab-inactive" data-target="cardio">Cardiovascular</button>
+                                    <button class="med-tab whitespace-nowrap py-3 px-1 border-b-2 text-sm tab-inactive" data-target="diabetes">Diabetes</button>
+                                    <button class="med-tab whitespace-nowrap py-3 px-1 border-b-2 text-sm tab-inactive" data-target="suporte">Suporte</button>
+                                </nav>
+                            </div>
+                            <div class="mt-4">
+                                <div id="imuno" class="med-content space-y-2">
+                                    <p class="p-2 bg-blue-50 rounded"><strong>Ciclosporina:</strong> 400mg/dia (200mg 2x/dia)</p>
+                                    <p class="p-2 bg-blue-50 rounded"><strong>Prednisona:</strong> 40mg/dia (2 comprimidos 1x/dia)</p>
+                                </div>
+                                <div id="cardio" class="med-content space-y-2 hidden">
+                                    <p class="p-2 bg-green-50 rounded"><strong>Hidroclorotiazida</strong></p>
+                                    <p class="p-2 bg-green-50 rounded"><strong>Hidralazina</strong></p>
+                                    <p class="p-2 bg-green-50 rounded"><strong>Olmesartana</strong></p>
+                                    <p class="p-2 bg-green-50 rounded"><strong>Carvedilol</strong></p>
+                                    <p class="p-2 bg-green-50 rounded"><strong>Anlodipino</strong></p>
+                                    <p class="p-2 bg-green-50 rounded"><strong>Espironolactona</strong></p>
+                                </div>
+                                <div id="diabetes" class="med-content space-y-2 hidden">
+                                     <p class="p-2 bg-yellow-50 rounded"><strong>Glicazida 60mg</strong></p>
+                                     <p class="p-2 bg-yellow-50 rounded"><strong>Dapagliflozina</strong></p>
+                                     <p class="p-2 bg-yellow-50 rounded"><strong>Insulina NPH:</strong> Doses variáveis 3x/dia</p>
+                                     <p class="p-2 bg-yellow-50 rounded"><strong>Insulina Regular:</strong> Doses variáveis 3x/dia</p>
+                                </div>
+                                <div id="suporte" class="med-content space-y-2 hidden">
+                                    <p class="p-2 bg-purple-50 rounded"><strong>Polivitamínicos</strong></p>
+                                    <p class="p-2 bg-purple-50 rounded"><strong>Vitamina D3 + K2</strong></p>
+                                    <p class="p-2 bg-purple-50 rounded"><strong>Cloridrato de Betaína</strong></p>
+                                    <p class="p-2 bg-purple-50 rounded"><strong>Tinturas Fitoterápicas</strong> (Alcachofra, Coentro)</p>
+                                    <p class="p-2 bg-purple-50 rounded"><strong>Probióticos</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center mt-12 pt-6 border-t border-gray-300">
+            <p class="text-sm text-gray-500">Este dashboard interativo foi gerado por uma inteligência artificial como uma ferramenta complementar para visualização de dados clínicos complexos.</p>
+            <p class="text-sm text-gray-500">A elaboração foi supervisionada e auxiliada por Wilder Paz, filho do paciente. As informações são baseadas nos relatórios e exames fornecidos. Acesso aos dados em 27 de setembro de 2025.</p>
+        </footer>
+    </div>
+
+<script>
+    function processLabels(labels) {
+        const charLimit = 16;
+        return labels.map(label => {
+            if (typeof label !== 'string' || label.length <= charLimit) return label;
+            const words = label.split(' ');
+            const newLabels = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > charLimit) {
+                    newLabels.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            newLabels.push(currentLine.trim());
+            return newLabels.filter(l => l);
+        });
+    }
+
+    const defaultTooltipCallback = {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        return Array.isArray(label) ? label.join(' ') : label;
+                    }
+                }
+            }
+        }
+    };
+    
+    function createHemoglobinChart() {
+        const ctx = document.getElementById('hemoglobinChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['01/24', '04/24', '08/24', '12/24', '03/25', '04/25', '06/25', '08/25', '13/09/25'],
+                datasets: [{
+                    label: 'Hemoglobina (g/dL)',
+                    data: [10.1, 10.3, 10.3, 10.1, 8.7, 7.2, 5.3, 6.2, 3.8],
+                    borderColor: '#DD5182',
+                    backgroundColor: 'rgba(221, 81, 130, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#DD5182'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false, title: { display: true, text: 'g/dL' } }, x: { title: { display: true, text: 'Data da Coleta (2024-2025)' } } },
+                plugins: { ...defaultTooltipCallback.plugins, title: { display: true, text: 'Evolução da Hemoglobina (Últimos 2 Anos)' }, legend: { display: false } }
+            }
+        });
+    }
+
+    function createProteinuriaChart() {
+        const ctx = document.getElementById('proteinuriaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Nível de Proteinúria'],
+                datasets: [
+                    { label: 'Paciente (612.5)', data: [612.5], backgroundColor: '#955196' },
+                    { label: 'Referência Máxima (140)', data: [140], backgroundColor: '#FFA600' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'mg/24 horas' } } },
+                plugins: { ...defaultTooltipCallback.plugins, title: { display: true, text: 'Comparativo de Perda de Proteína Urinária' }, legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    function createOsteoporosisChart() {
+        const ctx = document.getElementById('osteoporosisChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: processLabels(['Coluna Lombar (L1-L4)', 'Colo Femoral', 'Fêmur Total']),
+                datasets: [{
+                    label: 'T-score',
+                    data: [-4.3, -2.9, -2.3],
+                    backgroundColor: (context) => {
+                        const value = context.dataset.data[context.dataIndex];
+                        if (value <= -2.5) return '#FF6E54'; // Osteoporosis
+                        if (value < -1.0) return '#FFA600'; // Osteopenia
+                        return '#4CAF50'; // Normal
+                    }
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                scales: { x: { beginAtZero: false, title: { display: true, text: 'Desvio Padrão (T-score)' }, min: -5, max: 1 } },
+                plugins: { ...defaultTooltipCallback.plugins, title: { display: true, text: 'Densidade Mineral Óssea' }, legend: { display: false } }
+            }
+        });
+    }
+
+    function createManagementDonutChart() {
+        const ctx = document.getElementById('managementDonutChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gestão de Complicações (Cardio, DM)', 'Imunossupressão (APSV)', 'Suporte Nutricional/Fitoterápico', 'Suporte Transfusional'],
+                datasets: [{ data: [45, 25, 20, 10], backgroundColor: ['#955196', '#003F5C', '#FFA600', '#DD5182'], hoverOffset: 8 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { ...defaultTooltipCallback.plugins, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }, title: { display: true, text: 'Distribuição do Esforço Terapêutico' } }
+            }
+        });
+    }
+    
+    function setupTabs() {
+        const tabs = document.querySelectorAll('.med-tab');
+        const contents = document.querySelectorAll('.med-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.target;
+
+                tabs.forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('tab-inactive');
+                });
+                tab.classList.remove('tab-inactive');
+                tab.classList.add('tab-active');
+
+                contents.forEach(content => {
+                    if (content.id === target) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    }
+
+    window.onload = function() {
+        createHemoglobinChart();
+        createProteinuriaChart();
+        createOsteoporosisChart();
+        createManagementDonutChart();
+        setupTabs();
+    };
+</script>
+
+</body>
+</html>
 
